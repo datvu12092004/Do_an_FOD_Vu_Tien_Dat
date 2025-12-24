@@ -1,0 +1,56 @@
+#include <Arduino.h>
+
+#define SERVO_PIN 18
+#define SERVO_FREQ 50
+#define SERVO_RES 16
+
+int currentAngle = 0;   // góc hiện tại của servo
+
+// ===== Chuyển microsecond → duty =====
+uint32_t usToDuty(int us) {
+  return map(us, 0, 20000, 0, 65535);
+}
+
+// ===== Chuyển góc 0–270° → duty =====
+uint32_t angleToDuty(int angle) {
+  angle = constrain(angle, 0, 270);
+  int us = map(angle, 0, 270, 500, 2500);
+  return usToDuty(us);
+}
+
+// ===== Quay servo từ từ tới góc mong muốn =====
+void moveServoTo(int targetAngle) {
+  targetAngle = constrain(targetAngle, 0, 270);
+
+  while (currentAngle != targetAngle) {
+    if (currentAngle < targetAngle) currentAngle++;
+    else currentAngle--;
+
+    ledcWrite(SERVO_PIN, angleToDuty(currentAngle));
+    delay(15);   // chỉnh tốc độ quay tại đây
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  ledcAttach(SERVO_PIN, SERVO_FREQ, SERVO_RES);
+
+  Serial.println("Nhap goc servo (0 - 270):");
+}
+
+void loop() {
+  if (Serial.available()) {
+    int targetAngle = Serial.parseInt();
+
+    if (targetAngle >= 0 && targetAngle <= 270) {
+      Serial.print("Quay toi goc: ");
+      Serial.println(targetAngle);
+
+      moveServoTo(targetAngle);
+    } else {
+      Serial.println("Goc khong hop le! Nhap 0 - 270.");
+    }
+
+    delay(200);
+  }
+}
