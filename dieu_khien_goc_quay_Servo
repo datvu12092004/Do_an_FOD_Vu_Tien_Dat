@@ -27,7 +27,7 @@ void moveServoTo(int targetAngle) {
     else currentAngle--;
 
     ledcWrite(SERVO_PIN, angleToDuty(currentAngle));
-    delay(15);   // chỉnh tốc độ quay tại đây
+    delay(15);   // code chỉnh tốc độ quay nhanh hay chậm 
   }
 }
 
